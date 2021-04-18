@@ -3,6 +3,7 @@ import argparse
 from models.models import *
 from data_utils import *
 from collections import defaultdict
+import  numpy as np
 
 
 class Metrics(object):
@@ -10,7 +11,9 @@ class Metrics(object):
         pass
 
     def accuracy(self, pred, actual):
-        return 0.0
+        acc = torch.sum((torch.argmax(pred, dim=1) == actual).float())
+        acc /= pred.shape[0]
+        return acc
 
 class Recorder(object):
     def __init__(self):
@@ -27,11 +30,12 @@ class Recorder(object):
     
     def mean(self):
         for key, val in self.record_obj.items():
-            self.record_obj[key] = val/self.iterations
+            self.record_obj[key] = np.round(val/self.iterations, decimals=4) 
 
 
 class Trainer(object):
-    def __init__(self,
+    def __init__(
+                self,
                 model=None,
                 criterion=None,
                 optimizer=None,
@@ -42,6 +46,7 @@ class Trainer(object):
                 device=torch.device("cpu"),
                 log_after=1,
                 ):
+
         self.model = model 
         self.criterion = criterion
         self.optimizer = optimizer
@@ -52,6 +57,8 @@ class Trainer(object):
         self.log_after = log_after
         self.recorder = Recorder()
         self.metrics = Metrics()
+        self.best_val_acc = -float('inf')
+        self.stop_training = False
     
     def train_batch(self, batch):
         self.model.zero_grad()
@@ -61,7 +68,7 @@ class Trainer(object):
         acc = self.metrics.accuracy(out, label)
         self.recorder.record(
                             {'loss': loss.item(), 
-                            'accuracy': acc }
+                            'accuracy': acc.item() }
                             )
         loss.backward()
         self.optimizer.step()
@@ -70,15 +77,24 @@ class Trainer(object):
 
     def train(self):
         self._model_to_device()
-        for epoch in range(self.epochs):
+        epoch = 0
+        if epoch <= self.epochs and not self._early_stop():
             self._train_epoch(epoch)
         
+            val_metrics = self.evaluate()
+            if val_metrics['accuracy'] >= self.best_val_acc:
+                self.best_val_acc = val_metrics['accuracy']
+                self._save_checkpoint(epoch)
+            else:
+                self._update_learning_rate(0.2)
+            epoch+=1
 
     def _train_epoch(self, epoch):
         for itr, batch in enumerate(self.train_loader):
             self.train_batch(batch)
             
             if itr % self.log_after == 0:
+                self.recorder.mean()
                 print("itr {}:, {}".format(itr, dict(self.recorder.record_obj)))
                 self.recorder = Recorder()
             
@@ -91,15 +107,32 @@ class Trainer(object):
     def _model_to_device(self):
         self.model = self.model.to(self.device)
 
+    @torch.no_grad()
     def evaluate(self):
-        pass
+        val_recorder = Recorder()
+        for _, batch in enumerate(self.val_loader):
+            premise, hypothesis, label = map(self._to_device, (batch['premise'], batch['hypothesis'], batch['label']))
+            out = self.model(premise.T, hypothesis.T)
+            acc = self.metrics.accuracy(out, label)
+            val_recorder.record({'accuracy': acc.item()})
+        val_recorder.mean()
+        return val_recorder.record_obj
 
-    def _save_checkpoint(self):
+    def _save_checkpoint(self, epoch):
         pass
 
     def _update_learning_rate(self, factor):
         for param_group in self.optimizer.param_groups:
             param_group['lr'] = param_group['lr']*factor
+    
+    @property
+    def _current_learning_rate(self):
+        return self.optimizer.param_groups[0]['lr']
+    
+    def _early_stop(self):
+        if self._current_learning_rate <= 1e-5:
+            self.stop_training = True
+        return self.stop_training
 
 
 
