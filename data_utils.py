@@ -9,6 +9,7 @@ import json
 import pandas as pd
 from tqdm import tqdm
 import pickle
+from models.models import *
 # from gensim.models import KeyedVectors
 # from gensim.scripts.glove2word2vec import glove2word2vec
 # from gensim.test.utils import datapath, get_tmpfile
@@ -159,8 +160,12 @@ def get_data_loaders(path='./snli_1.0/', batch_size=32, slice_=-1):
 
     
 if __name__ == "__main__":
-    trainloader, devloader, testloader, vocab = get_data_loaders(batch_size=32, slice_=-1)
+    trainloader, devloader, testloader, vocab = get_data_loaders(batch_size=4, slice_=1000)
     vocab.build_vectors()
-    # for i in testloader:
-    #     print(i)
-    #     break
+    model = SNLInet("BiLSTM Pooling", vocab.vectors)
+    print(model)
+    for batch in testloader:
+        premise, hypothesis, label = batch['premise'], batch['hypothesis'], batch['label']
+        print(premise.shape)
+        out = model(premise.T, hypothesis.T)
+        break
