@@ -133,7 +133,7 @@ class SNLI(Dataset):
         if not flag and not label:
             return torch.LongTensor(vocab.Sentence(sentence.lower()))
         elif flag and not label:
-            return torch.LongTensor(vocab.embed(sentence))
+            return torch.LongTensor(vocab.embed(sentence.lower()))
         else:
             labels = {'neutral': 0, 'entailment': 1, 'contradiction': 2}
             return labels[sentence]
@@ -162,10 +162,11 @@ def get_data_loaders(path='./snli_1.0/', batch_size=32, slice_=-1):
 if __name__ == "__main__":
     trainloader, devloader, testloader, vocab = get_data_loaders(batch_size=4, slice_=1000)
     vocab.build_vectors()
-    model = SNLInet("BiLSTM Pooling", vocab.vectors)
+    model = SNLInet("BiLSTMpooling", vocab.vectors, hidden_dim=300)
     print(model)
     for batch in testloader:
         premise, hypothesis, label = batch['premise'], batch['hypothesis'], batch['label']
         print(premise.shape)
         out = model(premise.T, hypothesis.T)
+        print(type(label))
         break

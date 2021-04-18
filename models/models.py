@@ -50,23 +50,24 @@ class BiLSTM(nn.Module):
             return out
     @property
     def output_shape(self):
-        return self.emb_dim*2
+        return self.hidden_dim*2
 
 
 class Encoder(nn.Module):
-    def __init__(self, init_type=None, embeddings_init=None):
+    def __init__(self, init_type=None, embeddings_init=None, hidden_dim=None):
         super(Encoder, self).__init__()
         self.init = init_type
         self.pretrained_embeddings = embeddings_init
+        self.hidden_dim = hidden_dim
         self.Embed = nn.Embedding.from_pretrained(self.pretrained_embeddings, padding_idx=0)
         if self.init == "AWE":
             self.encoder = AWE(self.pretrained_embeddings.shape[1])
-        if self.init == "Unidirectional LSTM":
-            self.encoder = UniLSTM(self.pretrained_embeddings.shape[1], 300)
-        if self.init == "Bidirectional LSTM":
-            self.encoder = BiLSTM(self.pretrained_embeddings.shape[1], 300)
-        if self.init == "BiLSTM Pooling":
-            self.encoder = BiLSTM(self.pretrained_embeddings.shape[1], 300, pooling=True)
+        if self.init == "LSTM":
+            self.encoder = UniLSTM(self.pretrained_embeddings.shape[1], self.hidden_dim)
+        if self.init == "BiLSTM":
+            self.encoder = BiLSTM(self.pretrained_embeddings.shape[1], self.hidden_dim)
+        if self.init == "BiLSTMpooling":
+            self.encoder = BiLSTM(self.pretrained_embeddings.shape[1], self.hidden_dim, pooling=True)
             
 
     def forward(self, sentence): #shape = (bsz, seq_len)
@@ -79,11 +80,12 @@ class Encoder(nn.Module):
         return self.encoder.output_shape
 
 class SNLInet(nn.Module):
-    def __init__(self, encoder_init, embeddings_init):
+    def __init__(self, encoder_init, embeddings_init, hidden_dim=None):
         super(SNLInet, self).__init__()
         self.encoder_init = encoder_init
         self.embeddings_init = embeddings_init
-        self.encoder = Encoder(init_type=self.encoder_init, embeddings_init=self.embeddings_init)
+        self.hidden_dim = hidden_dim
+        self.encoder = Encoder(init_type=self.encoder_init, embeddings_init=self.embeddings_init, hidden_dim=self.hidden_dim)
         self.inp_dim = 4*self.encoder.output_shape
         self.num_classes = 3
         self.classifier = nn.Sequential(
