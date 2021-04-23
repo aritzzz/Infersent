@@ -5,3 +5,4 @@ snli_1.0/
 snli_1.0.zip
 __pycache__/
 Models/
+runs/

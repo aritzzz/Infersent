@@ -5,6 +5,7 @@ from data_utils import *
 from collections import defaultdict
 import  numpy as np
 import os
+from torch.utils.tensorboard import SummaryWriter
 
 
 class Metrics(object):
@@ -46,7 +47,8 @@ class Trainer(object):
                 learning_rate=0.001,
                 device=torch.device("cpu"),
                 log_after=1,
-                checkpoint_path=None
+                checkpoint_path=None,
+                tensorboard_writer=None
                 ):
 
         self.model = model 
@@ -62,6 +64,7 @@ class Trainer(object):
         self.best_val_acc = -float('inf')
         self.stop_training = False
         self.checkpoint_path = checkpoint_path
+        self.tensorboard_writer = tensorboard_writer
     
     def train_batch(self, batch):
         self.model.zero_grad()
@@ -100,9 +103,12 @@ class Trainer(object):
             if itr % self.log_after == 0:
                 self.recorder.mean()
                 print("itr {} Training : {}".format(itr, dict(self.recorder.record_obj)))
+                self.tensorboard_writer.add_scalar('training loss', self.recorder.record_obj['loss'], epoch*len(self.train_loader)+itr)
                 self.recorder = Recorder()
                 val_metrics = self.evaluate()
                 print("itr {} Validation : {} ".format(itr, val_metrics))
+                self.tensorboard_writer.add_scalar('validation loss', val_metrics['loss'], epcoh*(self.train_loader)+itr)
+                
             
 
     def _to_device(self, inp):
@@ -158,6 +164,8 @@ def main(args):
     ckp_path = os.path.join(args.save_dir, args.exp_name)
     os.makedirs(ckp_path, exist_ok=True)
 
+    tensorboard_writer = SummaryWriter('runs/' + args.exp_name)
+
     train_loader, val_loader, test_loader, vocab = get_data_loaders(batch_size=args.batch_size, slice_=args.slice)
     vocab.build_vectors()
     model = SNLInet(args.encoder, vocab.vectors, hidden_dim=args.hidden_dim)
@@ -172,7 +180,8 @@ def main(args):
                     learning_rate=args.lr,
                     device = torch.device(args.device),
                     epochs=args.epochs,
-                    checkpoint_path=ckp_path
+                    checkpoint_path=ckp_path,
+                    tensorboard_writer=tensorboard_writer
                      )
     trainer.train()
 
