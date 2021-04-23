@@ -49,7 +49,7 @@ class BiLSTM(nn.Module):
             out,_ = torch.max(padded_output, dim=1)
             return out
     @property
-    def output_shape(self):
+    def output_dim(self):
         return self.hidden_dim*2
 
 
@@ -76,8 +76,8 @@ class Encoder(nn.Module):
         return self.encoder(embedded, seq_lens=seq_lens)
     
     @property
-    def output_shape(self):
-        return self.encoder.output_shape
+    def output_dim(self):
+        return self.encoder.output_dim
 
 class SNLInet(nn.Module):
     def __init__(self, encoder_init, embeddings_init, hidden_dim=None):
@@ -86,7 +86,7 @@ class SNLInet(nn.Module):
         self.embeddings_init = embeddings_init
         self.hidden_dim = hidden_dim
         self.encoder = Encoder(init_type=self.encoder_init, embeddings_init=self.embeddings_init, hidden_dim=self.hidden_dim)
-        self.inp_dim = 4*self.encoder.output_shape
+        self.inp_dim = 4*self.encoder.output_dim
         self.num_classes = 3
         self.classifier = nn.Sequential(
                                     nn.Linear(self.inp_dim, 512),
