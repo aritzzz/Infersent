@@ -107,7 +107,7 @@ class Trainer(object):
                 self.recorder = Recorder()
                 val_metrics = self.evaluate()
                 print("itr {} Validation : {} ".format(itr, val_metrics))
-                self.tensorboard_writer.add_scalar('validation loss', val_metrics['loss'], epcoh*(self.train_loader)+itr)
+                self.tensorboard_writer.add_scalar('validation loss', val_metrics['loss'], epoch*len(self.train_loader)+itr)
                 
             
 
@@ -168,7 +168,7 @@ def main(args):
 
     train_loader, val_loader, test_loader, vocab = get_data_loaders(batch_size=args.batch_size, slice_=args.slice)
     vocab.build_vectors()
-    model = SNLInet(args.encoder, vocab.vectors, hidden_dim=args.hidden_dim)
+    model = SNLInet(args.encoder, vocab.vectors, hidden_dim=args.hidden_dim, device=torch.device(args.device))
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
     criterion = nn.CrossEntropyLoss()
 
@@ -181,7 +181,8 @@ def main(args):
                     device = torch.device(args.device),
                     epochs=args.epochs,
                     checkpoint_path=ckp_path,
-                    tensorboard_writer=tensorboard_writer
+                    tensorboard_writer=tensorboard_writer,
+                    log_after=args.log_after
                      )
     trainer.train()
 
@@ -211,6 +212,7 @@ if __name__ == "__main__":
     parser.add_argument('--exp_name', type=str, default='default',
                         help='Name of the experiment. Checkpoints will be saved with this name')
     parser.add_argument('--slice', type=int, default=-1, help='handy arg')
+    parser.add_argument('--log_after', type=int, default=1)
 
     args = parser.parse_args()
     main(args)

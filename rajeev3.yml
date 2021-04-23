@@ -211,4 +211,4 @@ dependencies:
     - watchdog==0.10.3
     - wordcloud==1.8.1
     - wrapt==1.12.1
-prefix: /home2/tirthankar/miniconda3_1/envs/rajeev3
+prefix: /home1/tirthankar/miniconda3_1/envs/rajeev3
