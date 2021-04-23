@@ -158,7 +158,7 @@ def main(args):
     ckp_path = os.path.join(args.save_dir, args.exp_name)
     os.makedirs(ckp_path, exist_ok=True)
 
-    train_loader, val_loader, test_loader, vocab = get_data_loaders(batch_size=args.batch_size, slice_=1000)
+    train_loader, val_loader, test_loader, vocab = get_data_loaders(batch_size=args.batch_size, slice_=args.slice)
     vocab.build_vectors()
     model = SNLInet(args.encoder, vocab.vectors, hidden_dim=args.hidden_dim)
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
@@ -201,6 +201,7 @@ if __name__ == "__main__":
                         help='path to save the checkpoints')
     parser.add_argument('--exp_name', type=str, default='default',
                         help='Name of the experiment. Checkpoints will be saved with this name')
+    parser.add_argument('--slice', type=int, default=-1, help='handy arg')
 
     args = parser.parse_args()
     main(args)
