@@ -54,11 +54,12 @@ class BiLSTM(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, init_type=None, embeddings_init=None, hidden_dim=None):
+    def __init__(self, init_type=None, embeddings_init=None, hidden_dim=None, device=device):
         super(Encoder, self).__init__()
         self.init = init_type
         self.pretrained_embeddings = embeddings_init
         self.hidden_dim = hidden_dim
+        self.device = device
         self.Embed = nn.Embedding.from_pretrained(self.pretrained_embeddings, padding_idx=0)
         if self.init == "AWE":
             self.encoder = AWE(self.pretrained_embeddings.shape[1])
@@ -71,7 +72,7 @@ class Encoder(nn.Module):
             
 
     def forward(self, sentence): #shape = (bsz, seq_len)
-        seq_lens = torch.sum(torch.ge(sentence, torch.tensor([1])).int(), dim=1)
+        seq_lens = torch.sum(torch.ge(sentence, torch.tensor([1]).to(self.device)).int(), dim=1)
         embedded = self.Embed(sentence)
         return self.encoder(embedded, seq_lens=seq_lens)
     
@@ -80,12 +81,13 @@ class Encoder(nn.Module):
         return self.encoder.output_shape
 
 class SNLInet(nn.Module):
-    def __init__(self, encoder_init, embeddings_init, hidden_dim=None):
+    def __init__(self, encoder_init, embeddings_init, hidden_dim=None,device='cpu'):
         super(SNLInet, self).__init__()
         self.encoder_init = encoder_init
         self.embeddings_init = embeddings_init
         self.hidden_dim = hidden_dim
-        self.encoder = Encoder(init_type=self.encoder_init, embeddings_init=self.embeddings_init, hidden_dim=self.hidden_dim)
+        self.device = device
+        self.encoder = Encoder(init_type=self.encoder_init, embeddings_init=self.embeddings_init, hidden_dim=self.hidden_dim, device=self.device)
         self.inp_dim = 4*self.encoder.output_shape
         self.num_classes = 3
         self.classifier = nn.Sequential(
