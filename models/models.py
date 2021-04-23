@@ -54,7 +54,7 @@ class BiLSTM(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, init_type=None, embeddings_init=None, hidden_dim=None, device=device):
+    def __init__(self, init_type=None, embeddings_init=None, hidden_dim=None, device='cpu'):
         super(Encoder, self).__init__()
         self.init = init_type
         self.pretrained_embeddings = embeddings_init
