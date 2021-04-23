@@ -84,7 +84,7 @@ class Trainer(object):
     def train(self):
         self._model_to_device()
         epoch = 0
-        if epoch <= self.epochs and not self._early_stop():
+        while epoch <= self.epochs and not self._early_stop():
             self._train_epoch(epoch)
         
             val_metrics = self.evaluate()
@@ -102,11 +102,11 @@ class Trainer(object):
             
             if itr % self.log_after == 0:
                 self.recorder.mean()
-                print("itr {} Training : {}".format(itr, dict(self.recorder.record_obj)))
+                print("itr {} Training : {}".format(itr + epoch*len(self.train_loader), dict(self.recorder.record_obj)))
                 self.tensorboard_writer.add_scalar('training loss', self.recorder.record_obj['loss'], epoch*len(self.train_loader)+itr)
                 self.recorder = Recorder()
                 val_metrics = self.evaluate()
-                print("itr {} Validation : {} ".format(itr, val_metrics))
+                print("itr {} Validation : {} ".format(itr + epoch*len(self.train_loader), val_metrics))
                 self.tensorboard_writer.add_scalar('validation loss', val_metrics['loss'], epoch*len(self.train_loader)+itr)
                 
             

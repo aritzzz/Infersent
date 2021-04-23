@@ -21,6 +21,7 @@ class UniLSTM(nn.Module):
         self.lstm = nn.LSTM(input_size=self.emb_dim, hidden_size=self.hidden_dim, batch_first=True)
     
     def forward(self, embed, seq_lens=None):
+        seq_lens = seq_lens.to('cpu')
         packed_seq_batch = nn.utils.rnn.pack_padded_sequence(embed, lengths=seq_lens, batch_first=True, enforce_sorted=False)
         out, (h,c) = self.lstm(packed_seq_batch.float())
         return h.squeeze()
@@ -38,6 +39,7 @@ class BiLSTM(nn.Module):
         self.bilstm = nn.LSTM(input_size=self.emb_dim, hidden_size=self.hidden_dim, batch_first=True, bidirectional=True)
     
     def forward(self, embed, seq_lens=None):
+        seq_lens = seq_lens.to('cpu')
         packed_seq_batch = nn.utils.rnn.pack_padded_sequence(embed, lengths=seq_lens, batch_first=True, enforce_sorted=False)
         out, (h,c) = self.bilstm(packed_seq_batch.float())
         if not self.pool:
