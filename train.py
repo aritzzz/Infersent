@@ -68,8 +68,12 @@ class Trainer(object):
     
     def train_batch(self, batch):
         self.model.zero_grad()
-        premise, hypothesis, label = map(self._to_device, (batch['premise'], batch['hypothesis'], batch['label']))
-        out = self.model(premise.T, hypothesis.T)
+        premise, hypothesis, label = batch['premise'], batch['hypothesis'], self._to_device(batch['label'])
+        premise = premise.T
+        hypothesis = hypothesis.T
+        p_len = torch.sum(torch.ge(premise, torch.tensor([1])).int(), dim=1)
+        h_len = torch.sum(torch.ge(hypothesis, torch.tensor([1])).int(), dim=1)
+        out = self.model((self._to_device(premise), p_len), (self._to_device(hypothesis), h_len))
         loss = self.criterion(out, label)
         acc = self.metrics.accuracy(out, label)
         self.recorder.record(
@@ -123,8 +127,12 @@ class Trainer(object):
     def evaluate(self):
         val_recorder = Recorder()
         for _, batch in enumerate(self.val_loader):
-            premise, hypothesis, label = map(self._to_device, (batch['premise'], batch['hypothesis'], batch['label']))
-            out = self.model(premise.T, hypothesis.T)
+            premise, hypothesis, label = batch['premise'], batch['hypothesis'], self._to_device(batch['label'])
+            premise = premise.T
+            hypothesis = hypothesis.T
+            p_len = torch.sum(torch.ge(premise, torch.tensor([1])).int(), dim=1)
+            h_len = torch.sum(torch.ge(hypothesis, torch.tensor([1])).int(), dim=1)
+            out = self.model((self._to_device(premise), p_len), (self._to_device(hypothesis), h_len))
             acc = self.metrics.accuracy(out, label)
             val_recorder.record({'accuracy': acc.item()})
         val_recorder.mean()

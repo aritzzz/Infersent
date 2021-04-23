@@ -21,7 +21,7 @@ class UniLSTM(nn.Module):
         self.lstm = nn.LSTM(input_size=self.emb_dim, hidden_size=self.hidden_dim, batch_first=True)
     
     def forward(self, embed, seq_lens=None):
-        seq_lens = seq_lens.to('cpu')
+        # seq_lens = seq_lens.to('cpu')
         packed_seq_batch = nn.utils.rnn.pack_padded_sequence(embed, lengths=seq_lens, batch_first=True, enforce_sorted=False)
         out, (h,c) = self.lstm(packed_seq_batch.float())
         return h.squeeze()
@@ -39,7 +39,7 @@ class BiLSTM(nn.Module):
         self.bilstm = nn.LSTM(input_size=self.emb_dim, hidden_size=self.hidden_dim, batch_first=True, bidirectional=True)
     
     def forward(self, embed, seq_lens=None):
-        seq_lens = seq_lens.to('cpu')
+        # seq_lens = seq_lens.to('cpu')
         packed_seq_batch = nn.utils.rnn.pack_padded_sequence(embed, lengths=seq_lens, batch_first=True, enforce_sorted=False)
         out, (h,c) = self.bilstm(packed_seq_batch.float())
         if not self.pool:
@@ -73,8 +73,8 @@ class Encoder(nn.Module):
             self.encoder = BiLSTM(self.pretrained_embeddings.shape[1], self.hidden_dim, pooling=True)
             
 
-    def forward(self, sentence): #shape = (bsz, seq_len)
-        seq_lens = torch.sum(torch.ge(sentence, torch.tensor([1]).to(self.device)).int(), dim=1)
+    def forward(self, sentence, seq_lens): #shape = (bsz, seq_len)
+        # seq_lens = torch.sum(torch.ge(sentence, torch.tensor([1]).to(self.device)).int(), dim=1)
         embedded = self.Embed(sentence)
         return self.encoder(embedded, seq_lens=seq_lens)
     
@@ -98,8 +98,8 @@ class SNLInet(nn.Module):
                                     )
 
     def forward(self, premise, hypothesis):
-        prem = self.encoder(premise)
-        hypo = self.encoder(hypothesis)
+        prem = self.encoder(premise[0], premise[1])
+        hypo = self.encoder(hypothesis[0], hypothesis[1])
         out = torch.cat((prem, hypo, torch.abs(prem-hypo), prem*hypo), dim=1)
         pred = self.classifier(out)
         return pred
