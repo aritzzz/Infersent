@@ -60,7 +60,7 @@ class Encoder(nn.Module):
         self.pretrained_embeddings = embeddings_init
         self.hidden_dim = hidden_dim
         self.device = device
-        self.Embed = nn.Embedding.from_pretrained(self.pretrained_embeddings, padding_idx=0)
+        self.Embed = nn.Embedding.from_pretrained(self.pretrained_embeddings, padding_idx=0).to(self.device)
         if self.init == "AWE":
             self.encoder = AWE(self.pretrained_embeddings.shape[1])
         if self.init == "LSTM":
@@ -88,7 +88,7 @@ class SNLInet(nn.Module):
         self.hidden_dim = hidden_dim
         self.device = device
         self.encoder = Encoder(init_type=self.encoder_init, embeddings_init=self.embeddings_init, hidden_dim=self.hidden_dim, device=self.device)
-        self.inp_dim = 4*self.encoder.output_shape
+        self.inp_dim = 4*self.encoder.output_dim
         self.num_classes = 3
         self.classifier = nn.Sequential(
                                     nn.Linear(self.inp_dim, 512),
