@@ -4,6 +4,7 @@ from models.models import *
 from data_utils import *
 from collections import defaultdict
 import  numpy as np
+import os
 
 
 class Metrics(object):
@@ -45,6 +46,7 @@ class Trainer(object):
                 learning_rate=0.001,
                 device=torch.device("cpu"),
                 log_after=1,
+                checkpoint_path=None
                 ):
 
         self.model = model 
@@ -59,6 +61,7 @@ class Trainer(object):
         self.metrics = Metrics()
         self.best_val_acc = -float('inf')
         self.stop_training = False
+        self.checkpoint_path = checkpoint_path
     
     def train_batch(self, batch):
         self.model.zero_grad()
@@ -82,6 +85,7 @@ class Trainer(object):
             self._train_epoch(epoch)
         
             val_metrics = self.evaluate()
+            print("Validation Loss {}, Accuracy {}".format(val_metrics['loss'], val_metrics['accuracy']))
             if val_metrics['accuracy'] >= self.best_val_acc:
                 self.best_val_acc = val_metrics['accuracy']
                 self._save_checkpoint(epoch)
@@ -95,8 +99,10 @@ class Trainer(object):
             
             if itr % self.log_after == 0:
                 self.recorder.mean()
-                print("itr {}:, {}".format(itr, dict(self.recorder.record_obj)))
+                print("itr {} Training : {}".format(itr, dict(self.recorder.record_obj)))
                 self.recorder = Recorder()
+                val_metrics = self.evaluate()
+                print("itr {} Validation : {} ".format(itr, val_metrics))
             
 
     def _to_device(self, inp):
@@ -119,7 +125,13 @@ class Trainer(object):
         return val_recorder.record_obj
 
     def _save_checkpoint(self, epoch):
-        pass
+        print("Saving the model at epoch {}".format(epoch))
+        whole_ckp = {'model_state_dict':self.model.state_dict(),
+                'optimizer_state_dict':self.optimizer.state_dict()}
+        torch.save(whole_ckp, os.path.join(self.checkpoint_path, 'model_' +str(epoch)+'.pt' ))
+
+        encoder_ckp = {'model_state_dict':self.model.encoder.state_dict()}
+        torch.save(encoder_ckp, os.path.join(self.checkpoint_path, 'encoder_' + str(epoch) + '.pt'))
 
     def _update_learning_rate(self, factor):
         for param_group in self.optimizer.param_groups:
@@ -142,11 +154,16 @@ class Trainer(object):
 
 
 def main(args):
+
+    ckp_path = os.path.join(args.save_dir, args.exp_name)
+    os.makedirs(ckp_path, exist_ok=True)
+
     train_loader, val_loader, test_loader, vocab = get_data_loaders(batch_size=args.batch_size, slice_=1000)
     vocab.build_vectors()
     model = SNLInet(args.encoder, vocab.vectors, hidden_dim=args.hidden_dim)
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
     criterion = nn.CrossEntropyLoss()
+
     trainer = Trainer(model=model,
                     criterion=criterion,
                     optimizer=optimizer,
@@ -154,7 +171,8 @@ def main(args):
                     val_loader=val_loader,
                     learning_rate=args.lr,
                     device = torch.device(args.device),
-                    epochs=args.epochs
+                    epochs=args.epochs,
+                    checkpoint_path=ckp_path
                      )
     trainer.train()
 
@@ -179,6 +197,10 @@ if __name__ == "__main__":
     parser.add_argument('--device', type=str, default="cpu")
     parser.add_argument('--epochs', type=int, default=1)
     parser.add_argument('--lr', type=float, default=0.1)
+    parser.add_argument('--save_dir', type=str, default='./Models',
+                        help='path to save the checkpoints')
+    parser.add_argument('--exp_name', type=str, default='default',
+                        help='Name of the experiment. Checkpoints will be saved with this name')
 
     args = parser.parse_args()
     main(args)
