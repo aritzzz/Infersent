@@ -32,6 +32,7 @@ class Vocabulary(object):
             torch.save(self.vectors, fname)
         else:
             self.vectors = torch.load(fname)
+        print("Embedding shape {}".format(self.vectors.shape))
 
     def align(self):
         if not self.pretrained:

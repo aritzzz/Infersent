@@ -1,10 +1,11 @@
 from __future__ import division
+import os
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 import argparse
 from models.models import *
 from data_utils import *
 from collections import defaultdict
 import  numpy as np
-import os
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -48,7 +49,8 @@ class Trainer(object):
                 device=torch.device("cpu"),
                 log_after=1,
                 checkpoint_path=None,
-                tensorboard_writer=None
+                tensorboard_writer=None,
+                test_loader=None,
                 ):
 
         self.model = model 
@@ -65,6 +67,7 @@ class Trainer(object):
         self.stop_training = False
         self.checkpoint_path = checkpoint_path
         self.tensorboard_writer = tensorboard_writer
+        self.test_loader = test_loader
     
     def train_batch(self, batch):
         self.model.zero_grad()
@@ -73,15 +76,21 @@ class Trainer(object):
         hypothesis = hypothesis.T
         p_len = torch.sum(torch.ge(premise, torch.tensor([1])).int(), dim=1)
         h_len = torch.sum(torch.ge(hypothesis, torch.tensor([1])).int(), dim=1)
-        out = self.model((self._to_device(premise), p_len), (self._to_device(hypothesis), h_len))
-        loss = self.criterion(out, label)
-        acc = self.metrics.accuracy(out, label)
-        self.recorder.record(
+        try:
+             out = self.model((self._to_device(premise), p_len), (self._to_device(hypothesis), h_len))
+             loss = self.criterion(out, label)
+             acc = self.metrics.accuracy(out, label)
+             self.recorder.record(
                             {'loss': loss.item(), 
                             'accuracy': acc.item() }
                             )
-        loss.backward()
-        self.optimizer.step()
+             loss.backward()
+             self.optimizer.step()
+        except Exception:
+             print(p_len)
+             print(h_len)
+             print(premise)
+             print(hypothesis)
 
 
 
@@ -159,6 +168,35 @@ class Trainer(object):
         if self._current_learning_rate <= 1e-5:
             self.stop_training = True
         return self.stop_training
+
+    @classmethod
+    def Initialize(cls, encoder=None, checkpoint_path=None, val_loader=None, test_loader=None, vocab=None, hidden_dim=None, device=None):
+        vocab.build_vectors()
+        model = SNLInet(encoder, vocab.vectors, hidden_dim=hidden_dim, device=torch.device(device)).to(torch.device(device))
+        checkpoint = torch.load(checkpoint_path, map_location=torch.device(device))
+        model.load_state_dict(checkpoint['model_state_dict'])
+
+        return cls(
+                    model=model,
+                    val_loader=val_loader,
+                    test_loader=test_loader,
+                    device=torch.device(device),
+                    )
+
+    def evaluate_on_test_data(self):
+        test_recorder = Recorder()
+        for _, batch in enumerate(self.test_loader):
+            premise, hypothesis, label = batch['premise'], batch['hypothesis'], self._to_device(batch['label'])
+            premise = premise.T
+            hypothesis = hypothesis.T
+            p_len = torch.sum(torch.ge(premise, torch.tensor([1])).int(), dim=1)
+            h_len = torch.sum(torch.ge(hypothesis, torch.tensor([1])).int(), dim=1)
+            out = self.model((self._to_device(premise), p_len), (self._to_device(hypothesis), h_len))
+            acc = self.metrics.accuracy(out, label)
+            test_recorder.record({'accuracy': acc.item()})
+        test_recorder.mean()
+        return test_recorder.record_obj
+
 
 
 
