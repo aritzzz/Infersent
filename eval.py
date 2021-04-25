@@ -17,7 +17,7 @@ def get_data_loaders(path='./snli_1.0/', batch_size=32, slice_=-1):
     dev = SNLI.read(path=path, split='dev', vocab=vocab, slice_=slice_)
     test = SNLI.read(path=path, split='test', vocab=vocab, slice_=slice_)
     dev_loader = DataLoader(dataset=dev, collate_fn=collater, batch_size=batch_size, shuffle=True, drop_last=True)
-    test_loader = DataLoader(dataset=dev, collate_fn=collater, batch_size=batch_size, shuffle=False, drop_last=False)
+    test_loader = DataLoader(dataset=test, collate_fn=collater, batch_size=batch_size, shuffle=False, drop_last=False)
 
     return dev_loader, test_loader, vocab
 
