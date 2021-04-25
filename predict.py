@@ -40,6 +40,7 @@ class Predictor(object):
 	def prepare(self, sentence):
 		return self.vocab.embed(sentence)
 
+	@torch.no_grad()
 	def predict(self, premise, hypothesis):
 		premise, hypothesis = torch.tensor(self.prepare(premise)), torch.tensor(self.prepare(hypothesis))
 		device = torch.device(CONFIG['device'])
