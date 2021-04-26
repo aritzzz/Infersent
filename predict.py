@@ -6,11 +6,12 @@ import argparse
 
 BASE_PATH = './Models'
 
-CONFIG = {'hidden_dim': {'LSTM':2048, 'BiLSTM':4096, 'BiLSTMpooling':4096},
+CONFIG = {'hidden_dim': {'AWE': 300, 'LSTM':2048, 'BiLSTM':4096, 'BiLSTMpooling':4096},
 		'vocab_path': './vocab.json',
 		'device': 'cpu',
-		'checkpoint': {'LSTM': 13, 'BiLSTM': 12, 'BiLSTMpooling': 5},
-		'model_path': {'LSTM': os.path.join(BASE_PATH, 'default'),
+		'checkpoint': {'AWE': 9, 'LSTM': 13, 'BiLSTM': 12, 'BiLSTMpooling': 5},
+		'model_path': {'AWE': os.path.join(BASE_PATH, 'awe'),
+                        'LSTM': os.path.join(BASE_PATH, 'default'),
 						'BiLSTM':os.path.join(BASE_PATH, 'bilstm'),
 						'BiLSTMpooling':os.path.join(BASE_PATH, 'bilstmpooling')}}
 
@@ -46,8 +47,8 @@ class Predictor(object):
 		device = torch.device(CONFIG['device'])
 		premise = premise.T.unsqueeze(0).to(device)
 		hypothesis = hypothesis.T.unsqueeze(0).to(device)
-		p_len = torch.tensor([premise.shape[1]])
-		h_len = torch.tensor([hypothesis.shape[1]])
+		p_len = torch.tensor([premise.shape[1]]).to(device)
+		h_len = torch.tensor([hypothesis.shape[1]]).to(device)
 		prem = self.model.encoder(premise, p_len)
 		hypo = self.model.encoder(hypothesis, h_len)
 		if prem.ndim == 1:

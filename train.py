@@ -185,7 +185,11 @@ class Trainer(object):
 
     def evaluate_on_test_data(self):
         test_recorder = Recorder()
-        for _, batch in enumerate(self.test_loader):
+        predictions = []
+        actual = []
+        pbar = tqdm(enumerate(self.test_loader))
+        for _, batch in pbar:
+            pbar.set_description("Evaluating on Test data")
             premise, hypothesis, label = batch['premise'], batch['hypothesis'], self._to_device(batch['label'])
             premise = premise.T
             hypothesis = hypothesis.T
@@ -194,8 +198,10 @@ class Trainer(object):
             out = self.model((self._to_device(premise), p_len), (self._to_device(hypothesis), h_len))
             acc = self.metrics.accuracy(out, label)
             test_recorder.record({'accuracy': acc.item()})
+            predictions.extend(out.argmax(dim=1).detach().to('cpu').squeeze().tolist())
+            actual.extend(label.to('cpu').squeeze().tolist())
         test_recorder.mean()
-        return test_recorder.record_obj
+        return test_recorder.record_obj, predictions, actual
 
 
 
@@ -256,7 +262,7 @@ if __name__ == "__main__":
     parser.add_argument('--save_dir', type=str, default='./Models',
                         help='path to save the checkpoints')
     parser.add_argument('--exp_name', type=str, default='default',
-                        help='Name of the experiment. Checkpoints will be saved with this name')
+                        help='Name of the experiment. Checkpoints will be saved in the folder with this name.')
     parser.add_argument('--slice', type=int, default=-1, help='handy arg')
     parser.add_argument('--log_after', type=int, default=1)
 

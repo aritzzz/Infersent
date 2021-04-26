@@ -9,7 +9,7 @@ from train import *
 import  numpy as np
 import json
 
-def get_data_loaders(path='./snli_1.0/', batch_size=32, slice_=-1):
+def get_data_loaders_(path='./snli_1.0/', batch_size=32, slice_=-1):
     vocab = Vocab()
     with open('./vocab.json', 'r') as fp:
     	vc = json.load(fp)
@@ -25,7 +25,7 @@ def get_data_loaders(path='./snli_1.0/', batch_size=32, slice_=-1):
 
 
 def main(args):
-	val_loader, test_loader, vocab = get_data_loaders()
+	val_loader, test_loader, vocab = get_data_loaders_()
 	ckp_path = os.path.join(args.save_dir, args.exp_name, 'model_' + str(args.epoch_ckp) + '.pt')
 	evaluator = Trainer.Initialize(encoder=args.encoder,
 									val_loader=val_loader,
@@ -37,7 +37,7 @@ def main(args):
 									)
 
 	val_recorder = evaluator.evaluate()
-	test_recorder = evaluator.evaluate_on_test_data()
+	test_recorder,_,_ = evaluator.evaluate_on_test_data()
 
 	print("VALIDATION {}".format(dict(val_recorder)))
 	print("TEST {}".format(dict(test_recorder)))

@@ -1,0 +1,37 @@
+The contents and the directory structure to be followed is as follows:
+
+eval_logs/
+Models/
+    awe/
+    default/  -----> stands for LSTM
+    bilstm/
+    bilstmpooling
+models/
+runs/
+snli_1.0/
+data_utils.py
+eval.py
+glove.840B.300d.txt
+glove.840B.300d_aligned.pt
+predict.py
+rajeev3.yml
+senteval.py
+train.py
+vocab.json
+
+Models: The trained models. 
+glove.840B.300d_aligned.pt: the glove vectors aligned with the vocabulary corresponding to the data.
+
+*The following above two have to downloaded from:
+https://drive.google.com/drive/folders/1dfbPdJ5WzBkWPMuymy4a7ziFQ8DzZW_0?usp=sharing
+
+Though, no other alternative libraries have not been used. So, the code should run on any regular Pytorch environment. Still, the environment corresponding to the code is provided in rajeev3.yml file.
+
+eval_logs: evaluation logs for all the models
+runs: Tensorboard logs. 
+
+The main scripts are:
+train.py: To train the models. Please use train.py -h to see the arguments.
+eval.py: To evaluate the models on validation and test data. Again, please follow the eval.py -h to see the args.
+predict.py: This script takes encoder type, and premise-hypothesis pair to predict the relation between them.
+
