@@ -1,0 +1,5 @@
+total pairs 9841, Vocabulary size 36547
+total pairs 9823, Vocabulary size 36547
+Embedding shape torch.Size([36547, 300])
+VALIDATION {'accuracy': 0.7972}
+TEST {'accuracy': 0.7989}

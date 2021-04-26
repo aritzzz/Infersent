@@ -1,0 +1,91 @@
+total pairs 9841, Vocabulary size 36547
+total pairs 9823, Vocabulary size 36547
+Embedding shape torch.Size([36547, 300])
+VALIDATION {'accuracy': 0.8085}
+TEST {'accuracy': 0.8026}
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+Embedding shape torch.Size([36547, 300])
+Encoder(
+  (Embed): Embedding(36547, 300, padding_idx=0)
+  (encoder): UniLSTM(
+    (lstm): LSTM(300, 2048, batch_first=True)
+  )
+)
+{'STS14': {'deft-forum': {'pearson': (0.3925067221219258, 5.0228515011271346e-18), 'spearman': SpearmanrResult(correlation=0.4211007152081228, pvalue=9.085478570450775e-21), 'nsamples': 450}, 'deft-news': {'pearson': (0.5522488869343696, 2.3812242615096116e-25), 'spearman': SpearmanrResult(correlation=0.5201236089683858, pvalue=3.4101685848530025e-22), 'nsamples': 300}, 'headlines': {'pearson': (0.4986677400512909, 2.118841398209548e-48), 'spearman': SpearmanrResult(correlation=0.46212209713005453, pvalue=5.991932770904796e-41), 'nsamples': 750}, 'images': {'pearson': (0.8050263350206546, 8.60146337338935e-172), 'spearman': SpearmanrResult(correlation=0.7586489918671249, pvalue=2.4669235130630055e-141), 'nsamples': 750}, 'OnWN': {'pearson': (0.6065257502464594, 1.519511866046159e-76), 'spearman': SpearmanrResult(correlation=0.6492027539692048, pvalue=5.796652011935176e-91), 'nsamples': 750}, 'tweet-news': {'pearson': (0.5367310592725896, 3.490454165039278e-57), 'spearman': SpearmanrResult(correlation=0.4944742270829717, pvalue=1.688872549522989e-47), 'nsamples': 750}, 'all': {'pearson': {'mean': 0.5652844156078817, 'wmean': 0.5806708945275796}, 'spearman': {'mean': 0.5509453990376442, 'wmean': 0.5650315885523168}}}, 'MR': {'devacc': 72.49, 'acc': 71.58, 'ndev': 10662, 'ntest': 10662}, 'CR': {'devacc': 78.69, 'acc': 77.43, 'ndev': 3775, 'ntest': 3775}, 'MPQA': {'devacc': 85.22, 'acc': 84.96, 'ndev': 10606, 'ntest': 10606}, 'SUBJ': {'devacc': 86.96, 'acc': 86.57, 'ndev': 10000, 'ntest': 10000}, 'SST2': {'devacc': 78.56, 'acc': 76.83, 'ndev': 872, 'ntest': 1821}, 'SST5': {'devacc': 40.24, 'acc': 38.46, 'ndev': 1101, 'ntest': 2210}, 'TREC': {'devacc': 62.89, 'acc': 72.2, 'ndev': 5452, 'ntest': 500}, 'MRPC': {'devacc': 72.47, 'acc': 72.64, 'f1': 81.8, 'ndev': 4076, 'ntest': 1725}, 'SICKEntailment': {'devacc': 83.0, 'acc': 83.28, 'ndev': 500, 'ntest': 4927}, 'SICKRelatedness': {'devpearson': 0.8534017228754309, 'pearson': 0.8508544159108244, 'spearman': 0.7879276044765344, 'mse': 0.2813099764297631, 'yhat': array([3.45010568, 3.86796866, 1.01557336, ..., 2.98383557, 4.46743083,
+       4.69639702]), 'ndev': 500, 'ntest': 4927}}

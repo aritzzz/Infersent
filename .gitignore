@@ -6,6 +6,5 @@ snli_1.0.zip
 __pycache__/
 Models/
 runs/
-*.log
-*.eval
 SentEval/
+*.log

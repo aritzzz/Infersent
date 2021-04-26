@@ -1,13 +1,16 @@
+from __future__ import division
 import torch
 import torch.nn as nn
 
 class AWE(nn.Module):
-    def __init__(self, emb_dim):
+    def __init__(self, emb_dim, device=None):
         super(AWE, self).__init__()
         self.emb_dim = emb_dim
+        self.device = device
 
     def forward(self, embed, seq_lens=None):
-        return torch.mean(embed, dim=1)
+        out = torch.sum(embed, dim=1)/(seq_lens.to(self.device).unsqueeze(1))
+        return out
     
     @property
     def output_dim(self):
@@ -64,7 +67,7 @@ class Encoder(nn.Module):
         self.device = device
         self.Embed = nn.Embedding.from_pretrained(self.pretrained_embeddings, padding_idx=0).to(self.device)
         if self.init == "AWE":
-            self.encoder = AWE(self.pretrained_embeddings.shape[1])
+            self.encoder = AWE(self.pretrained_embeddings.shape[1],device=self.device)
         if self.init == "LSTM":
             self.encoder = UniLSTM(self.pretrained_embeddings.shape[1], self.hidden_dim)
         if self.init == "BiLSTM":
